@@ -120,13 +120,11 @@ script forwards extra Hydra overrides, so append them to the command.
 
 ### Sleep mode
 
-vLLM-Omni's diffusion worker uses vLLM's CUDA memory allocator for sleep mode,
-so with the default config the rollout server fails at model load with
-`AssertionError: cumem allocator is not available`.
-[vllm-project/vllm-omni#5485](https://github.com/vllm-project/vllm-omni/pull/5485)
-switches it to vLLM's platform allocator; with that change applied to the pinned
-vLLM-Omni commit, the smoke tests pass with sleep mode on. Until the vLLM-Omni pin
-includes it, turn sleep mode off:
+Sleep mode is not supported on Intel GPU yet. vLLM-Omni's diffusion worker uses
+vLLM's CUDA memory allocator for it, so with the default config the rollout
+server fails at model load with `AssertionError: cumem allocator is not available`.
+The fix, [vllm-project/vllm-omni#5485](https://github.com/vllm-project/vllm-omni/pull/5485),
+is waiting to be merged. Until then, turn sleep mode off:
 
 ```bash
 actor_rollout_ref.rollout.free_cache_engine=False \
