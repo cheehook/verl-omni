@@ -1,6 +1,6 @@
 # Installation (Intel GPU)
 
-Last updated: 10/19/2026
+Last updated: 10/20/2026
 
 For NVIDIA GPU, see the {doc}`GPU installation guide <install>`. For Ascend NPU, see the {doc}`NPU installation guide <install_npu>`. For AMD GPU, see the {doc}`ROCm installation guide <install_rocm>`.
 
@@ -56,7 +56,8 @@ uv pip install -e ".[xpu]"
 The `xpu` extra is required on Intel GPU. It installs
 [`verl-hardware-plugin`](https://github.com/verl-project/verl-hardware-plugin),
 which registers the Intel platform with verl. Without it verl does not detect
-the GPU and falls back to NCCL.
+the GPU and falls back to NCCL. It also installs `dpctl`, which Ray uses to
+count Intel GPUs; without it Ray reports no GPU resources.
 
 | Extra      | Install                         | When needed                    |
 | ---------- | ------------------------------- | ------------------------------ |
@@ -121,7 +122,11 @@ script forwards extra Hydra overrides, so append them to the command.
 
 vLLM-Omni's diffusion worker uses vLLM's CUDA memory allocator for sleep mode,
 so with the default config the rollout server fails at model load with
-`AssertionError: cumem allocator is not available`. Turn sleep mode off:
+`AssertionError: cumem allocator is not available`.
+[vllm-project/vllm-omni#5485](https://github.com/vllm-project/vllm-omni/pull/5485)
+switches it to vLLM's platform allocator; with that change applied to the pinned
+vLLM-Omni commit, the smoke tests pass with sleep mode on. Until the vLLM-Omni pin
+includes it, turn sleep mode off:
 
 ```bash
 actor_rollout_ref.rollout.free_cache_engine=False \
@@ -130,15 +135,6 @@ actor_rollout_ref.rollout.free_cache_engine=False \
 
 The rollout weights then stay on the GPU while the actor trains, which limits
 the model size a colocated run can fit.
-
-### Ray GPU count
-
-Ray detects Intel GPUs through the `dpctl` package, which the image does not
-include, so Ray reports no GPU resources. Pass the count explicitly:
-
-```bash
-+ray_kwargs.ray_init.num_gpus=<number of GPUs>
-```
 
 ### Attention backend
 
@@ -181,8 +177,7 @@ hf download tiny-random/qwen3-vl --local-dir ~/models/tiny-random/qwen3-vl
 
 NUM_GPUS=2 bash tests/special_e2e/run_flowgrpo_qwen_image.sh \
   actor_rollout_ref.rollout.free_cache_engine=False \
-  +actor_rollout_ref.rollout.enable_sleep_mode=False \
-  +ray_kwargs.ray_init.num_gpus=2
+  +actor_rollout_ref.rollout.enable_sleep_mode=False
 ```
 
 The script prints per-step metrics and ends with
