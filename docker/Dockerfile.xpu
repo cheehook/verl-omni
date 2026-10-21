@@ -55,7 +55,9 @@ RUN VERL_REF="${VERL_GIT_REF:-$(tr -d '[:space:]' < .github/verl_pin.txt)}" \
 
 # Step 3: verl-omni and its core dependencies (vllm-omni arrives via the core deps),
 # plus the xpu extra.
-RUN uv pip install -e ".[xpu]"
+RUN VERL_REF="${VERL_GIT_REF:-$(tr -d '[:space:]' < .github/verl_pin.txt)}" \
+ && printf 'verl @ git+https://github.com/verl-project/verl.git@%s\n' "${VERL_REF}" > /tmp/verl-override.txt \
+ && uv pip install --override /tmp/verl-override.txt -e ".[xpu]"
 
 # Device-independent checks only; the GPU runtime is not reachable at build time.
 RUN python3 -c "import torch; print('torch', torch.__version__, '| XPU', torch.version.xpu)" \
