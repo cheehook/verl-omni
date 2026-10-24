@@ -101,6 +101,7 @@ alignment and does not directly enforce source-image preservation.
 | Trainer | Example script | GPU config |
 |---------|---------------|------------|
 | Flow-GRPO (LoRA, V1 sync — default) | `examples/flowgrpo_trainer/sd35/run_sd35_medium_ocr_lora_v1.sh` | 3×GPU (2 actor+rollout, 1 reward) |
+| Flow-GRPO (LoRA, V1 sync, Intel GPU) | `examples/flowgrpo_trainer/sd35/run_sd35_medium_ocr_lora_v1_xpu.sh` | 3×Intel GPU (2 actor+rollout, 1 reward) |
 | Flow-GRPO (DiNa-LRM) | `examples/flowgrpo_trainer/sd35/run_sd35_medium_drm_lora.sh` | 8×GPU (7 actor+rollout, 1 latent-reward server) |
 | Diffusion-DPO (offline, v0 by design) | `examples/dpo_trainer/sd35/run_sd35_medium_offline_dpo_lora.sh` | 3×GPU |
 | [DiffusionOPD](../algo/diffusion_opd.md) (single teacher, OCR) | `examples/diffusionopd_trainer/sd35/run_sd35_medium_ocr_distill.sh` | 3×GPU (2 actor+rollout+teacher, 1 reward) |
