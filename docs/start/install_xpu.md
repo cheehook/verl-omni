@@ -1,6 +1,6 @@
 # Installation (Intel GPU)
 
-Last updated: 10/20/2026
+Last updated: 10/26/2026
 
 For NVIDIA GPU, see the {doc}`GPU installation guide <install>`. For Ascend NPU, see the {doc}`NPU installation guide <install_npu>`. For AMD GPU, see the {doc}`ROCm installation guide <install_rocm>`.
 
@@ -144,12 +144,26 @@ actor_rollout_ref.model.attn_backend=native \
 actor_rollout_ref.rollout.rollout_attn_backend=TORCH_SDPA
 ```
 
+SDPA on Intel GPU already runs FlashAttention-2 kernels. FlashAttention-2 from the
+Kernel Hub (`kernels-community/flash-attn2`) also has an Intel GPU build.
+
 ## Current status
 
 Validated with the tiny-random GPU smoke tests on Arc Pro B60 and B70: FlowGRPO
 (FSDP and FSDP2, rollout TP 1 and 2, rule-based and vLLM-served reward models),
-DiffusionNFT, online DPO, and BAGEL FlowGRPO. Full-size recipes have not been
-validated yet.
+DiffusionNFT, online DPO, and BAGEL FlowGRPO.
+
+Full-size recipes: SD3.5-Medium FlowGRPO OCR on 3x Arc Pro B60, see
+{doc}`FlowGRPO quickstart <flowgrpo_quickstart>`.
+
+Reward models on Arc Pro B60: a separate reward GPU pool with async scoring, the
+vLLM-served Qwen2.5-VL-3B OCR reward model, the whisper_cer HTTP scorer service
+(start it with `--device xpu`), and the HPSv3, CLAP, PickScore, CLIPScore and HPSv2.1
+scorers, which match their CPU scores.
+
+FSDP2 with CPU offload on Arc Pro B60: verl's parameter and optimizer offload and FSDP2's
+own `CPUOffloadPolicy` (`fsdp_config.offload_policy=True`), for FlowGRPO with LoRA and
+full fine-tuning, DiffusionNFT and online DPO.
 
 Not yet supported on Intel GPU:
 
