@@ -1,7 +1,7 @@
 (flowgrpo_quickstart)=
 # Quickstart: FlowGRPO training on OCR dataset
 
-Last updated: 09/21/2026
+Last updated: 10/24/2026
 
 Post-train a diffusion image generation model with FlowGRPO.
 
@@ -119,6 +119,18 @@ Run the training script:
 ```bash
 bash examples/flowgrpo_trainer/sd35/run_sd35_medium_ocr_lora_v1.sh
 ```
+
+On Intel GPU, install with the {doc}`Intel GPU guide <install_xpu>` and run the
+Intel GPU variant instead. It keeps the same 3-GPU layout and fits on Arc Pro B60
+(24 GB) cards:
+
+```bash
+bash examples/flowgrpo_trainer/sd35/run_sd35_medium_ocr_lora_v1_xpu.sh
+```
+
+It turns sleep mode off, which Intel GPU does not support yet, offloads the actor
+parameters, uses smaller micro batches and rollout batches, and caps the image size
+the reward model's processor accepts.
 
 The legacy v0 script (`run_sd35_medium_ocr_lora.sh`, entrypoint
 `main_diffusion`) is **deprecated** and only remains for the v0 trainer; see

@@ -1,6 +1,6 @@
 # Installation (Intel GPU)
 
-Last updated: 10/20/2026
+Last updated: 10/24/2026
 
 For NVIDIA GPU, see the {doc}`GPU installation guide <install>`. For Ascend NPU, see the {doc}`NPU installation guide <install_npu>`. For AMD GPU, see the {doc}`ROCm installation guide <install_rocm>`.
 
@@ -148,8 +148,10 @@ actor_rollout_ref.rollout.rollout_attn_backend=TORCH_SDPA
 
 Validated with the tiny-random GPU smoke tests on Arc Pro B60 and B70: FlowGRPO
 (FSDP and FSDP2, rollout TP 1 and 2, rule-based and vLLM-served reward models),
-DiffusionNFT, online DPO, and BAGEL FlowGRPO. Full-size recipes have not been
-validated yet.
+DiffusionNFT, online DPO, and BAGEL FlowGRPO.
+
+Full-size recipes: SD3.5-Medium FlowGRPO OCR on 3x Arc Pro B60, see
+{doc}`FlowGRPO quickstart <flowgrpo_quickstart>`.
 
 Not yet supported on Intel GPU:
 
