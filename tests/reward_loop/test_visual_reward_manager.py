@@ -92,7 +92,7 @@ def test_reward_model_genrm():
         config.reward.reward_model.nnodes = 1
         config.reward.reward_model.model_path = reward_model_name
         config.reward.reward_model.rollout.name = os.getenv("ROLLOUT_NAME", "vllm")
-        config.reward.reward_model.rollout.gpu_memory_utilization = 0.8  # headroom for TP=2 on 24 GB GPUs
+        config.reward.reward_model.rollout.gpu_memory_utilization = 0.9
         config.reward.reward_model.rollout.tensor_model_parallel_size = tp_size
         config.reward.reward_model.rollout.skip_tokenizer_init = False
         config.reward.reward_model.rollout.prompt_length = 2048
@@ -139,7 +139,7 @@ def _build_deterministic_reward_config(seed: int, num_replicas: int = 1):
     config.reward.reward_model.nnodes = 1
     config.reward.reward_model.model_path = reward_model_name
     config.reward.reward_model.rollout.name = os.getenv("ROLLOUT_NAME", "vllm")
-    config.reward.reward_model.rollout.gpu_memory_utilization = 0.8  # headroom for TP=2 on 24 GB GPUs
+    config.reward.reward_model.rollout.gpu_memory_utilization = 0.9
     config.reward.reward_model.rollout.tensor_model_parallel_size = tp_size
     config.reward.reward_model.rollout.skip_tokenizer_init = False
     config.reward.reward_model.rollout.prompt_length = 2048
