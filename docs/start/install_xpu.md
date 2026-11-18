@@ -1,6 +1,6 @@
 # Installation (Intel GPU)
 
-Last updated: 11/09/2026
+Last updated: 11/18/2026
 
 For NVIDIA GPU, see the {doc}`GPU installation guide <install>`. For Ascend NPU, see the {doc}`NPU installation guide <install_npu>`. For AMD GPU, see the {doc}`ROCm installation guide <install_rocm>`. For Cambricon MLU, see the {doc}`MLU installation guide <install_mlu>`.
 
@@ -131,6 +131,21 @@ actor_rollout_ref.rollout.rollout_attn_backend=TORCH_SDPA
 SDPA on Intel GPU can use FlashAttention-2 kernels (for bf16 and fp16 inputs).
 FlashAttention-2 from the Kernel Hub (`kernels-community/flash-attn2`) also has an
 Intel GPU build.
+
+### Omni trainer: external modules
+
+verl imports the modules in `VERL_USE_EXTERNAL_MODULES` before it loads the
+`verl.plugins` entry points. With the default `verl_omni`, the omni trainer's
+workers detect the platform before verl-hardware-plugin registers Intel GPU and
+fail with `Distributed package doesn't have NCCL built in`. List the plugin
+first:
+
+```bash
+export VERL_USE_EXTERNAL_MODULES=verl_hardware_plugin,verl_omni
+```
+
+The omni GPU smoke scripts and `examples/grpo_trainer/qwen3_tts/run_qwen3_tts_grpo.sh`
+keep a value that is already set.
 
 ## Current status
 
