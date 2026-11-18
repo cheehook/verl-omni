@@ -93,10 +93,12 @@ def create_composite_training_config(
         "+ar.override_config.attn_implementation=sdpa",  # new, default is FA2
         "use_remove_padding=True",  # new, AR sp must apply
     ]
-    from verl_omni.utils.diffusion_attention import fa_available
+    from verl_omni.utils.diffusion_attention import actor_fa_backend, fa_available
 
     if cp > 1 or not fa_available():
         model_overrides.append("attn_backend=native")
+    else:
+        model_overrides.append("attn_backend=" + actor_fa_backend())
 
     with initialize_config_dir(config_dir=os.path.abspath("verl_omni/trainer/config/diffusion/model")):
         cfg = compose(config_name="diffusion_model", overrides=model_overrides)

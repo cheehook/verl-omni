@@ -21,7 +21,7 @@ max_prompt_length=256
 # Use exit-code checks only — importing verl/vllm may print INFO lines on stdout.
 if [[ -z "${ATTN_BACKEND:-}" || -z "${ROLLOUT_ATTN_BACKEND:-}" ]]; then
     if python3 -c 'from verl_omni.utils.diffusion_attention import fa_available; raise SystemExit(0 if fa_available() else 1)' >/dev/null 2>&1; then
-        ATTN_BACKEND=${ATTN_BACKEND:-_flash_3_varlen_hub}
+        ATTN_BACKEND=${ATTN_BACKEND:-$(python3 -c 'from verl_omni.utils.diffusion_attention import actor_fa_backend; print("ACTOR_FA=" + actor_fa_backend())' 2>/dev/null | sed -n 's/^ACTOR_FA=//p')}
         ROLLOUT_ATTN_BACKEND=${ROLLOUT_ATTN_BACKEND:-FLASH_ATTN}
     else
         ATTN_BACKEND=${ATTN_BACKEND:-native}

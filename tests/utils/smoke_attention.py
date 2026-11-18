@@ -16,9 +16,9 @@
 from __future__ import annotations
 
 from verl_omni.utils.diffusion_attention import (
-    ACTOR_FA3_BACKEND,
     ACTOR_NATIVE_BACKEND,
     ROLLOUT_SDPA_BACKEND,
+    actor_fa_backend,
     fa_available,
 )
 
@@ -35,4 +35,4 @@ def resolve_smoke_attention_backends() -> tuple[str, str]:
     """
     if not fa_available():
         return ACTOR_NATIVE_BACKEND, ROLLOUT_SDPA_BACKEND
-    return ACTOR_FA3_BACKEND, ROLLOUT_LOCAL_FA_BACKEND
+    return actor_fa_backend(), ROLLOUT_LOCAL_FA_BACKEND
