@@ -73,7 +73,7 @@ fa2 = [
     "flash-attn>=2.8.3",
 ]
 gpu = [
-    "kernels==0.16.1",
+    "kernels==0.17.3",
     "liger-kernel",
     "cupy-cuda13x",
 ]
@@ -208,6 +208,6 @@ verl_omni = [
 override-dependencies = [
     "accelerate>=1.14.0",
     "diffusers>=0.43.0",
-    "kernels==0.16.1",
+    "kernels==0.17.3",
     "transformers>=5.16.1,<5.20.0",
 ]
