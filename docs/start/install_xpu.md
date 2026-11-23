@@ -1,6 +1,6 @@
 # Installation (Intel GPU)
 
-Last updated: 11/18/2026
+Last updated: 11/23/2026
 
 For NVIDIA GPU, see the {doc}`GPU installation guide <install>`. For Ascend NPU, see the {doc}`NPU installation guide <install_npu>`. For AMD GPU, see the {doc}`ROCm installation guide <install_rocm>`. For Cambricon MLU, see the {doc}`MLU installation guide <install_mlu>`.
 
@@ -145,7 +145,8 @@ export VERL_USE_EXTERNAL_MODULES=verl_hardware_plugin,verl_omni
 ```
 
 The omni GPU smoke scripts and `examples/grpo_trainer/qwen3_tts/run_qwen3_tts_grpo.sh`
-keep a value that is already set.
+keep a value that is already set. The other omni example scripts set the variable
+themselves, so change it in the script.
 
 ## Current status
 
