@@ -49,8 +49,28 @@ def _cuda_supports_rollout_fa() -> bool:
         return False
 
 
+def _xpu_available() -> bool:
+    try:
+        import torch
+
+        return hasattr(torch, "xpu") and torch.xpu.is_available()
+    except Exception:
+        return False
+
+
+def actor_fa_backend() -> str:
+    """Actor FA backend for this device.
+
+    The Hub FA3 kernel has no Intel GPU build, so Intel GPU uses the Hub FA2 kernel.
+    """
+    return ACTOR_FA2_BACKEND if _xpu_available() else ACTOR_FA3_BACKEND
+
+
 def rollout_fa_available() -> bool:
     """True when local FA packages can back ``FLASH_ATTN`` rollout."""
+    if _xpu_available():
+        # vllm-omni runs FLASH_ATTN on Intel GPU through vllm-xpu-kernels.
+        return importlib.util.find_spec("vllm_xpu_kernels") is not None
     if not _cuda_supports_rollout_fa():
         return False
     for module_name in ("fa3_fwd_interface", "flash_attn"):

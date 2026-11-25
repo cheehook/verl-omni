@@ -120,17 +120,27 @@ script forwards extra Hydra overrides, so append them to the command.
 
 ### Attention backend
 
-Only the native/SDPA pair has been validated on Intel GPU. Recipes that select
-FlashAttention (`_flash_3_varlen_hub` / `FLASH_ATTN_3_HUB`) need:
+Recipes default to FlashAttention 3 (`_flash_3_varlen_hub` / `FLASH_ATTN_3_HUB`).
+The Kernel Hub FA3 kernel has no Intel GPU build, so use FlashAttention-2 for the
+actor:
+
+```bash
+actor_rollout_ref.model.attn_backend=flash_varlen_hub \
+actor_rollout_ref.rollout.rollout_attn_backend=FLASH_ATTN
+```
+
+The actor loads `kernels-community/flash-attn2` from the Kernel Hub. The rollout
+runs vLLM-Omni's `FLASH_ATTN` backend on vllm-xpu-kernels; vLLM-Omni also maps
+`FLASH_ATTN_HUB` and `FLASH_ATTN_3_HUB` to it on Intel GPU. The native/SDPA pair
+works too:
 
 ```bash
 actor_rollout_ref.model.attn_backend=native \
 actor_rollout_ref.rollout.rollout_attn_backend=TORCH_SDPA
 ```
 
-SDPA on Intel GPU can use FlashAttention-2 kernels (for bf16 and fp16 inputs).
-FlashAttention-2 from the Kernel Hub (`kernels-community/flash-attn2`) also has an
-Intel GPU build.
+SDPA on Intel GPU already runs FlashAttention-2 kernels for bf16 and fp16 inputs,
+so expect about the same training speed from both pairs.
 
 ## Current status
 

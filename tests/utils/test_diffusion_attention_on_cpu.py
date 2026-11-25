@@ -122,7 +122,25 @@ def test_fa2_actor_allows_flash_attn():
 
 def test_resolve_smoke_attention_backends_prefers_local_fa(monkeypatch):
     monkeypatch.setattr("tests.utils.smoke_attention.fa_available", lambda: True)
+    monkeypatch.setattr("verl_omni.utils.diffusion_attention._xpu_available", lambda: False)
     assert resolve_smoke_attention_backends() == ("_flash_3_varlen_hub", "FLASH_ATTN")
+
+
+def test_resolve_smoke_attention_backends_uses_fa2_on_xpu(monkeypatch):
+    monkeypatch.setattr("tests.utils.smoke_attention.fa_available", lambda: True)
+    monkeypatch.setattr("verl_omni.utils.diffusion_attention._xpu_available", lambda: True)
+    assert resolve_smoke_attention_backends() == ("flash_varlen_hub", "FLASH_ATTN")
+
+
+@pytest.mark.parametrize("has_kernels", [True, False])
+def test_rollout_fa_available_on_xpu_follows_vllm_xpu_kernels(monkeypatch, has_kernels):
+    from verl_omni.utils import diffusion_attention as da
+
+    monkeypatch.setattr(da, "_xpu_available", lambda: True)
+    monkeypatch.setattr(
+        da.importlib.util, "find_spec", lambda name: object() if has_kernels and name == "vllm_xpu_kernels" else None
+    )
+    assert da.rollout_fa_available() is has_kernels
 
 
 def test_resolve_smoke_attention_backends_falls_back_without_fa3(monkeypatch):
