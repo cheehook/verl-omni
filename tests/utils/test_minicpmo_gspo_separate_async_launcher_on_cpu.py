@@ -114,8 +114,12 @@ def test_launcher_keeps_the_minicpm_model_wiring():
     assert "reward.reward_manager.name=minicpm_naive" in settings
     assert "reward.custom_reward_function.path=verl_omni/utils/reward_score/choice_reward.py" in settings
 
-    # Standalone server actors import verl_omni through this export.
-    assert "export VERL_USE_EXTERNAL_MODULES=verl_omni" in settings
+    # Standalone server actors import verl_omni through this export; a preset
+    # value, such as a hardware plugin, is kept in front of it.
+    assert (
+        "export VERL_USE_EXTERNAL_MODULES=${VERL_USE_EXTERNAL_MODULES:+${VERL_USE_EXTERNAL_MODULES},}verl_omni"
+        in settings
+    )
 
 
 def test_launcher_keeps_flash_attention_default():

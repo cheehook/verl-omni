@@ -88,7 +88,8 @@ def _compose_launcher(tmp_path, extra=(), script=SCRIPT):
         return compose(config_name="omni_trainer", overrides=argv[2:])
 
 
-def test_launcher_composes_actor_and_reference_as_veomni(tmp_path, actor_module):
+def test_launcher_composes_actor_and_reference_as_veomni(tmp_path, actor_module, monkeypatch):
+    monkeypatch.delenv("VERL_USE_EXTERNAL_MODULES", raising=False)
     config = _compose_launcher(tmp_path)
     actor = omega_conf_to_dataclass(config.actor_rollout_ref.actor)
     assert isinstance(actor, actor_module.OmniVeOmniActorConfig)
@@ -110,6 +111,14 @@ def test_launcher_composes_actor_and_reference_as_veomni(tmp_path, actor_module)
     assert actor.optim.lr_decay_ratio == 1.0
     assert config.actor_rollout_ref.rollout.val_kwargs.temperature == 0.0
     assert config.ray_kwargs.ray_init.runtime_env.env_vars.VERL_USE_EXTERNAL_MODULES == "verl_omni"
+
+
+def test_runtime_env_keeps_comma_separated_external_modules(tmp_path, actor_module, monkeypatch):
+    # Hydra must pass a plugin-first module list to the Ray workers as one value.
+    monkeypatch.setenv("VERL_USE_EXTERNAL_MODULES", "verl_hardware_plugin,verl_omni")
+    config = _compose_launcher(tmp_path)
+    env_vars = config.ray_kwargs.ray_init.runtime_env.env_vars
+    assert env_vars.VERL_USE_EXTERNAL_MODULES == "verl_hardware_plugin,verl_omni"
 
 
 def test_launcher_user_overrides_take_precedence(tmp_path, actor_module):

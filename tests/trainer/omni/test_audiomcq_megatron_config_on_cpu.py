@@ -28,6 +28,8 @@ LAUNCHER = REPO_ROOT / "examples/gspo_trainer/qwen3_omni/run_qwen3_omni_megatron
 def public_recipe_config(tmp_path_factory):
     output_dir = tmp_path_factory.mktemp("audiomcq-config") / "artifacts"
     env = os.environ.copy()
+    # The launcher puts a preset value in front of verl_omni; pin the unset case.
+    env.pop("VERL_USE_EXTERNAL_MODULES", None)
     env.update(
         {
             "AUDIO_MCQ_CONFIG_ONLY": "1",

@@ -1,6 +1,6 @@
 # Installation (Intel GPU)
 
-Last updated: 11/23/2026
+Last updated: 11/26/2026
 
 For NVIDIA GPU, see the {doc}`GPU installation guide <install>`. For Ascend NPU, see the {doc}`NPU installation guide <install_npu>`. For AMD GPU, see the {doc}`ROCm installation guide <install_rocm>`. For Cambricon MLU, see the {doc}`MLU installation guide <install_mlu>`.
 
@@ -137,16 +137,20 @@ Intel GPU build.
 verl imports the modules in `VERL_USE_EXTERNAL_MODULES` before it loads the
 `verl.plugins` entry points. With the default `verl_omni`, the omni trainer's
 workers detect the platform before verl-hardware-plugin registers Intel GPU and
-fail with `Distributed package doesn't have NCCL built in`. List the plugin
-first:
+fail with `Distributed package doesn't have NCCL built in`. Set the plugin
+module before running an omni script:
 
 ```bash
-export VERL_USE_EXTERNAL_MODULES=verl_hardware_plugin,verl_omni
+export VERL_USE_EXTERNAL_MODULES=verl_hardware_plugin
 ```
 
-The omni GPU smoke scripts and `examples/grpo_trainer/qwen3_tts/run_qwen3_tts_grpo.sh`
-keep a value that is already set. The other omni example scripts set the variable
-themselves, so change it in the script.
+The omni example, smoke and nightly scripts add `verl_omni` after a value that is
+already set, and use `verl_omni` alone otherwise. When you run
+`python -m verl_omni.trainer.main_omni` without a script, list both modules,
+plugin first: `VERL_USE_EXTERNAL_MODULES=verl_hardware_plugin,verl_omni`. If the
+trainer attaches to a Ray cluster started earlier with `ray start`, also export
+that full list in the shell that starts the cluster, because the workers take
+their environment from it.
 
 ## Current status
 
