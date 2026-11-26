@@ -1,6 +1,6 @@
 # How to Add a New Omni Model
 
-Last updated: 11/24/2026.
+Last updated: 11/25/2026.
 
 This guide walks through adding a new omni (multimodal autoregressive) model to
 the verl-omni training framework. It uses the Qwen3-Omni Thinker adapter as a
@@ -255,7 +255,7 @@ no recipe-specific YAML files or `--config-path/--config-name`. The Megatron
 recipe instead selects the shared config described in §2.1.
 
 ```bash
-export VERL_USE_EXTERNAL_MODULES=verl_omni
+export VERL_USE_EXTERNAL_MODULES=${VERL_USE_EXTERNAL_MODULES:+${VERL_USE_EXTERNAL_MODULES},}verl_omni
 
 python3 -m verl_omni.trainer.main_omni \
     data.train_files="$HOME/data/train.parquet" \
@@ -276,6 +276,8 @@ Key points:
 
 - No `external_lib` — adapters are auto-registered via the Python import
   triggered by `VERL_USE_EXTERNAL_MODULES=verl_omni`.
+- The export appends `verl_omni` to a value that is already set, so modules
+  that must load before it keep their place in front.
 - No `stage_configs_path` — the rollout deploy config is auto-generated
   from `pipeline_name` by `vLLMOmniHttpServer`.
 - Use `omni_single_turn_agent` only for an omni model's autoregressive Talker

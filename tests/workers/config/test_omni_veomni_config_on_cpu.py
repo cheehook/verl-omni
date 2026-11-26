@@ -61,13 +61,19 @@ def actor_module():
         yield module
 
 
-def _compose_launcher(tmp_path, extra=(), script=SCRIPT):
-    """Capture the actual shell argv, then compose it with the production YAML."""
+def _compose_launcher(tmp_path, extra=(), script=SCRIPT, monkeypatch=None):
+    """Capture the actual shell argv, then compose it with the production YAML.
+
+    With ``monkeypatch``, the script's exported ``VERL_USE_EXTERNAL_MODULES`` is
+    applied to this process, so ``oc.env`` overrides resolve to what the launcher
+    actually passes rather than to the test's own environment.
+    """
     capture = tmp_path / "python3"
     capture.write_text(
         f"#!{sys.executable}\nimport json, sys\n"
         "if sys.argv[1:3] == ['-m', 'verl_omni.trainer.main_omni']:\n"
-        "    print(json.dumps(sys.argv[1:]))\n"
+        "    import os\n"
+        "    print(json.dumps({'argv': sys.argv[1:], 'modules': os.environ.get('VERL_USE_EXTERNAL_MODULES')}))\n"
     )
     capture.chmod(0o755)
     result = subprocess.run(
@@ -82,7 +88,13 @@ def _compose_launcher(tmp_path, extra=(), script=SCRIPT):
         text=True,
         check=True,
     )
-    argv = json.loads(result.stdout)
+    captured = json.loads(result.stdout)
+    argv = captured["argv"]
+    if monkeypatch is not None:
+        if captured["modules"] is None:
+            monkeypatch.delenv("VERL_USE_EXTERNAL_MODULES", raising=False)
+        else:
+            monkeypatch.setenv("VERL_USE_EXTERNAL_MODULES", captured["modules"])
     assert argv[:2] == ["-m", "verl_omni.trainer.main_omni"]
     with initialize_config_dir(config_dir=str(ROOT / "verl_omni/trainer/config"), version_base=None):
         return compose(config_name="omni_trainer", overrides=argv[2:])
@@ -90,7 +102,7 @@ def _compose_launcher(tmp_path, extra=(), script=SCRIPT):
 
 def test_launcher_composes_actor_and_reference_as_veomni(tmp_path, actor_module, monkeypatch):
     monkeypatch.delenv("VERL_USE_EXTERNAL_MODULES", raising=False)
-    config = _compose_launcher(tmp_path)
+    config = _compose_launcher(tmp_path, monkeypatch=monkeypatch)
     actor = omega_conf_to_dataclass(config.actor_rollout_ref.actor)
     assert isinstance(actor, actor_module.OmniVeOmniActorConfig)
     assert isinstance(actor, VeOmniActorConfig)
@@ -114,11 +126,12 @@ def test_launcher_composes_actor_and_reference_as_veomni(tmp_path, actor_module,
 
 
 def test_runtime_env_keeps_comma_separated_external_modules(tmp_path, actor_module, monkeypatch):
-    # Hydra must pass a plugin-first module list to the Ray workers as one value.
+    # The launcher keeps the preset in front of verl_omni, and Hydra passes the
+    # comma-separated list to the Ray workers as one value.
     monkeypatch.setenv("VERL_USE_EXTERNAL_MODULES", "verl_hardware_plugin,verl_omni")
-    config = _compose_launcher(tmp_path)
+    config = _compose_launcher(tmp_path, monkeypatch=monkeypatch)
     env_vars = config.ray_kwargs.ray_init.runtime_env.env_vars
-    assert env_vars.VERL_USE_EXTERNAL_MODULES == "verl_hardware_plugin,verl_omni"
+    assert env_vars.VERL_USE_EXTERNAL_MODULES == "verl_hardware_plugin,verl_omni,verl_omni"
 
 
 def test_launcher_user_overrides_take_precedence(tmp_path, actor_module):
